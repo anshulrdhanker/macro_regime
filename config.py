@@ -1,12 +1,12 @@
 START_DATE = "2010-01-01"
 
 LAYERS = {
-    "L1_rates_liquidity": ["HYG", "JNK", "SGOV", "BIL", "SHV", "KRE", "KBE"],
-    "L2_global_growth":   ["COPX", "FCX", "SOXX", "SMH", "IYT", "JETS", "EEM", "VWO"],
-    "L3_domestic_cycle":  ["XHB", "ITB", "IWM", "IJR", "XLY", "XLP", "WOOD", "CUT"],
-    "L4_risk_appetite":   ["XLF", "XLU", "HYG", "ITA", "XAR", "PPA", "EEM", "IVE", "IVW"],
-    "L5_inflation_commodities": ["XLE", "VDE", "CRAK", "MOO", "DBA", "SOIL", "XLB", "GLD"],
-    "L6_stress_dislocation":    ["KRE", "XLF", "IWM", "SPY", "HYG", "JNK", "XLU", "TLT"],
+    "L1_rates_liquidity": ["HYG", "JNK", "SGOV", "BIL", "SHV", "KRE", "KBE"], # barometer of Rates & liquidity
+    "L2_global_growth":   ["COPX", "FCX", "SOXX", "SMH", "IYT", "JETS", "EEM", "VWO"], # global growth
+    "L3_domestic_cycle":  ["XHB", "ITB", "IWM", "IJR", "XLY", "XLP", "WOOD", "CUT"], # domestic cycle
+    "L4_risk_appetite":   ["XLF", "XLU", "HYG", "ITA", "XAR", "PPA", "EEM", "IVE", "IVW"], #risk
+    "L5_inflation_commodities": ["XLE", "VDE", "CRAK", "MOO", "DBA", "SOIL", "XLB", "GLD"], #inflation and commodities
+    "L6_stress_dislocation":    ["KRE", "XLF", "IWM", "SPY", "HYG", "JNK", "XLU", "TLT"], #stress / dislocation
 }
 
 # Extra tickers needed for ratios but not in any layer
