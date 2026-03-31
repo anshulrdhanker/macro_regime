@@ -48,8 +48,8 @@ def compute_rolling_zscores(prices: pd.DataFrame) -> dict[str, pd.DataFrame]:
             "zscore_20d":  DataFrame (date × ticker),
             "zscore_60d":  DataFrame (date × ticker),
         }
-    daily_returns are used as the input series so z-score = how extreme
-    today's move is relative to the trailing window's distribution.
+    Use these for spike/volatility detection (single-day anomalies).
+    For regime detection, use compute_regime_zscores() instead.
     """
     daily_returns = prices.pct_change(1)
     short_w  = WINDOWS["short"]   # 20
@@ -59,6 +59,21 @@ def compute_rolling_zscores(prices: pd.DataFrame) -> dict[str, pd.DataFrame]:
     zscore_60 = daily_returns.apply(_rolling_zscore, window=medium_w)
 
     return {"zscore_20d": zscore_20, "zscore_60d": zscore_60}
+
+
+def compute_regime_zscores(prices: pd.DataFrame) -> pd.DataFrame:
+    """
+    Z-score of the 20-day rolling return, normalized over a 252-day window.
+
+    This is the correct input for layer scores and regime detection.
+    It answers: "How unusual is this asset's trend over the past month
+    relative to the past year?" — not "how unusual was today."
+
+    Result: smooth, directional signals that hold positive or negative
+    for weeks/months, showing macro regime waves rather than daily noise.
+    """
+    returns_20d = prices.pct_change(20)
+    return returns_20d.apply(_rolling_zscore, window=WINDOWS["long"])  # 252-day
 
 
 # ---------------------------------------------------------------------------
@@ -162,13 +177,14 @@ def run_full_analysis(prices: pd.DataFrame) -> dict[str, pd.DataFrame]:
     """
     print("[analysis] Running full analysis pipeline...")
 
-    returns    = compute_returns(prices)
-    zscores    = compute_rolling_zscores(prices)
-    pct_ranks  = compute_percentile_ranks(prices)
-    ratios     = compute_ratios(prices)
-    ratio_z    = compute_ratio_zscores(ratios)
-    layer_20   = compute_layer_scores(zscores["zscore_20d"])
-    layer_60   = compute_layer_scores(zscores["zscore_60d"])
+    returns      = compute_returns(prices)
+    zscores      = compute_rolling_zscores(prices)
+    regime_z     = compute_regime_zscores(prices)
+    pct_ranks    = compute_percentile_ranks(prices)
+    ratios       = compute_ratios(prices)
+    ratio_z      = compute_ratio_zscores(ratios)
+    layer_20     = compute_layer_scores(zscores["zscore_20d"])   # spike-based (noisy, use for alerts)
+    layer_60     = compute_layer_scores(regime_z)                # regime-based (smooth, use for dashboard)
 
     print("[analysis] Done.")
 
@@ -176,6 +192,7 @@ def run_full_analysis(prices: pd.DataFrame) -> dict[str, pd.DataFrame]:
         "returns":           returns,
         "zscore_20d":        zscores["zscore_20d"],
         "zscore_60d":        zscores["zscore_60d"],
+        "zscore_regime":     regime_z,
         "pct_rank_252d":     pct_ranks,
         "ratios":            ratios,
         "ratio_zscore_20d":  ratio_z["ratio_zscore_20d"],

@@ -12,7 +12,6 @@ from pathlib import Path
 import pandas as pd
 import yfinance as yf
 from dotenv import load_dotenv
-from fredapi import Fred
 
 from config import (
     DATA_DIR, ETF_PARQUET, FRED_PARQUET,
@@ -78,10 +77,12 @@ def fetch_etf_prices(tickers: list[str], start: str) -> pd.DataFrame:
 
 def fetch_fred_data(series_dict: dict[str, str], start: str) -> pd.DataFrame:
     """
-    Returns a DataFrame of FRED macro series.
+    Returns a DataFrame of FRED macro series via direct REST API calls.
     Index: DatetimeIndex
     Columns: human-readable names from series_dict values
     """
+    import requests
+
     api_key = os.getenv("FRED_API_KEY")
     if not api_key:
         raise EnvironmentError(
@@ -89,15 +90,29 @@ def fetch_fred_data(series_dict: dict[str, str], start: str) -> pd.DataFrame:
             "Get a free key at https://fred.stlouisfed.org/docs/api/api_key.html"
         )
 
-    fred = Fred(api_key=api_key)
     frames = {}
     for fred_id, col_name in series_dict.items():
         print(f"[data_pull] Fetching FRED series: {fred_id} → {col_name}")
-        s = fred.get_series(fred_id, observation_start=start)
+        r = requests.get(
+            "https://api.stlouisfed.org/fred/series/observations",
+            params={
+                "series_id":        fred_id,
+                "api_key":          api_key,
+                "file_type":        "json",
+                "observation_start": start,
+            },
+        )
+        r.raise_for_status()
+        observations = r.json()["observations"]
+        s = pd.Series(
+            {obs["date"]: pd.to_numeric(obs["value"], errors="coerce")
+             for obs in observations},
+            name=col_name,
+        )
+        s.index = pd.to_datetime(s.index)
         frames[col_name] = s
 
     df = pd.DataFrame(frames)
-    df.index = pd.to_datetime(df.index)
     df.index.name = "date"
     print(f"[data_pull] FRED data shape: {df.shape}")
     return df

@@ -1,12 +1,21 @@
 START_DATE = "2010-01-01"
 
 LAYERS = {
+<<<<<<< HEAD
     "L1_rates_liquidity": ["HYG", "JNK", "SGOV", "BIL", "SHV", "KRE", "KBE"], # barometer of Rates & liquidity
     "L2_global_growth":   ["COPX", "FCX", "SOXX", "SMH", "IYT", "JETS", "EEM", "VWO"], # global growth
     "L3_domestic_cycle":  ["XHB", "ITB", "IWM", "IJR", "XLY", "XLP", "WOOD", "CUT"], # domestic cycle
     "L4_risk_appetite":   ["XLF", "XLU", "HYG", "ITA", "XAR", "PPA", "EEM", "IVE", "IVW"], #risk
     "L5_inflation_commodities": ["XLE", "VDE", "CRAK", "MOO", "DBA", "SOIL", "XLB", "GLD"], #inflation and commodities
     "L6_stress_dislocation":    ["KRE", "XLF", "IWM", "SPY", "HYG", "JNK", "XLU", "TLT"], #stress / dislocation
+=======
+    "L1_rates_liquidity": ["HYG", "JNK", "KRE", "KBE"],
+    "L2_global_growth":   ["COPX", "FCX", "SOXX", "SMH", "IYT", "JETS", "EEM", "VWO"],
+    "L3_domestic_cycle":  ["XHB", "ITB", "IWM", "IJR", "XLY", "XLP", "WOOD", "CUT"],
+    "L4_risk_appetite":   ["XLF", "XLU", "HYG", "ITA", "XAR", "PPA", "EEM", "IVE", "IVW"],
+    "L5_inflation_commodities": ["XLE", "VDE", "CRAK", "MOO", "DBA", "SOIL", "XLB", "GLD"],
+    "L6_stress_dislocation":    ["XLU", "TLT", "GLD"],
+>>>>>>> c0f4308 (Add Streamlit dashboard and finalize macro barometer system)
 }
 
 # Extra tickers needed for ratios but not in any layer
@@ -27,7 +36,7 @@ RATIOS = [
 FRED_SERIES = {
     "DGS2":     "yield_2yr",
     "HOUST":    "housing_starts",
-    "NAPM":     "ism_manufacturing",
+    "INDPRO":   "industrial_production",
     "CPIAUCSL": "cpi",
 }
 
