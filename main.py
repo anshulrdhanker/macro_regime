@@ -20,13 +20,18 @@ Usage (Jupyter):
 
 import argparse
 
-from analysis import run_full_analysis
+from analysis import run_dashboard_analysis, run_full_analysis
 from data_pull import load_or_pull
 
 
-def load(force_refresh: bool = False) -> tuple[dict, dict]:
-    data     = load_or_pull(force_refresh=force_refresh)
-    analysis = run_full_analysis(data["etf_prices"])
+def load(force_refresh: bool = False, analysis_mode: str = "full") -> tuple[dict, dict]:
+    data = load_or_pull(force_refresh=force_refresh)
+    if analysis_mode == "dashboard":
+        analysis = run_dashboard_analysis(data["etf_prices"])
+    elif analysis_mode == "full":
+        analysis = run_full_analysis(data["etf_prices"])
+    else:
+        raise ValueError(f"Unknown analysis_mode: {analysis_mode}")
     return data, analysis
 
 
@@ -35,7 +40,7 @@ if __name__ == "__main__":
     parser.add_argument("--refresh", action="store_true", help="Force re-pull from APIs")
     args = parser.parse_args()
 
-    data, analysis = load(force_refresh=args.refresh)
+    data, analysis = load(force_refresh=args.refresh, analysis_mode="full")
 
     print("\n=== Data Summary ===")
     print(f"ETF prices:  {data['etf_prices'].shape}  ({data['etf_prices'].index[0].date()} → {data['etf_prices'].index[-1].date()})")

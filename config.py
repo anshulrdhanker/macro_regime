@@ -1,5 +1,17 @@
 START_DATE = "2010-01-01"
 
+# Dashboard / signal settings
+VOTE_THRESHOLD = 0.5
+STATE_THRESHOLD = 0.5
+DELTA_THRESHOLD = 0.25
+MOMENTUM_WINDOW = 20          # trading days, used for "1M change"
+CHART_LOOKBACK = 252          # trading days, used for composite trend
+DATA_FRESHNESS_MINUTES = 60   # cache TTL for pulled market / macro data
+OPENAI_SUMMARY_MODEL = "gpt-5.4-mini"
+OPENAI_SUMMARY_MAX_TOKENS = 500
+OPENAI_SUMMARY_REASONING_EFFORT = "none"
+OPENAI_SUMMARY_VERBOSITY = "low"
+
 LAYERS = {
     "L1_rates_liquidity": ["HYG", "JNK", "KRE", "KBE"],
     "L2_global_growth":   ["COPX", "FCX", "SOXX", "SMH", "IYT", "JETS", "EEM", "VWO"],

@@ -26,7 +26,7 @@ def compute_returns(prices: pd.DataFrame) -> pd.DataFrame:
     periods = {"1d": 1, "5d": 5, "20d": 20, "60d": 60}
     frames = {}
     for label, n in periods.items():
-        frames[label] = prices.pct_change(n)
+        frames[label] = prices.pct_change(n, fill_method=None)
 
     return pd.concat(frames, axis=1).swaplevel(axis=1).sort_index(axis=1)
     # columns: MultiIndex (ticker, period)
@@ -51,7 +51,7 @@ def compute_rolling_zscores(prices: pd.DataFrame) -> dict[str, pd.DataFrame]:
     Use these for spike/volatility detection (single-day anomalies).
     For regime detection, use compute_regime_zscores() instead.
     """
-    daily_returns = prices.pct_change(1)
+    daily_returns = prices.pct_change(1, fill_method=None)
     short_w  = WINDOWS["short"]   # 20
     medium_w = WINDOWS["medium"]  # 60
 
@@ -72,7 +72,7 @@ def compute_regime_zscores(prices: pd.DataFrame) -> pd.DataFrame:
     Result: smooth, directional signals that hold positive or negative
     for weeks/months, showing macro regime waves rather than daily noise.
     """
-    returns_20d = prices.pct_change(20)
+    returns_20d = prices.pct_change(20, fill_method=None)
     return returns_20d.apply(_rolling_zscore, window=WINDOWS["long"])  # 252-day
 
 
@@ -90,7 +90,7 @@ def compute_percentile_ranks(prices: pd.DataFrame) -> pd.DataFrame:
     Expect ~30s on first run. Result is cached in main.py.
     """
     window = WINDOWS["long"]  # 252
-    daily_returns = prices.pct_change(1)
+    daily_returns = prices.pct_change(1, fill_method=None)
 
     def _pct_rank(x: np.ndarray) -> float:
         return pd.Series(x).rank(pct=True).iloc[-1]
@@ -124,7 +124,7 @@ def compute_ratios(prices: pd.DataFrame) -> pd.DataFrame:
 
 def compute_ratio_zscores(ratio_df: pd.DataFrame) -> dict[str, pd.DataFrame]:
     """Z-scores of ratio daily returns, same 20d/60d windows as tickers."""
-    daily = ratio_df.pct_change(1)
+    daily = ratio_df.pct_change(1, fill_method=None)
     short_w  = WINDOWS["short"]
     medium_w = WINDOWS["medium"]
 
@@ -199,4 +199,25 @@ def run_full_analysis(prices: pd.DataFrame) -> dict[str, pd.DataFrame]:
         "ratio_zscore_60d":  ratio_z["ratio_zscore_60d"],
         "layer_scores_20d":  layer_20,
         "layer_scores_60d":  layer_60,
+    }
+
+
+def run_dashboard_analysis(prices: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    """
+    Lightweight analysis path for the live dashboard.
+
+    Only computes the regime-based series needed to render the page:
+        zscore_regime   — 20d return z-score over 252d window
+        layer_scores_60d — equal-weight layer composites from regime z-scores
+    """
+    print("[analysis] Running dashboard analysis pipeline...")
+
+    regime_z = compute_regime_zscores(prices)
+    layer_60 = compute_layer_scores(regime_z)
+
+    print("[analysis] Dashboard analysis ready.")
+
+    return {
+        "zscore_regime": regime_z,
+        "layer_scores_60d": layer_60,
     }

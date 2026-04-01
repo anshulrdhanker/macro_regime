@@ -1,0 +1,235 @@
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap");
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #070707;
+    color: #d4d4d4;
+    font-family: "Satoshi", sans-serif;
+}
+
+#app-root {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2rem 1.4rem 3rem;
+}
+
+.hero-block,
+.section-block,
+.chart-block,
+.mini-panel {
+    background: #0d0d0d;
+    border: 1px solid #171717;
+    border-radius: 16px;
+}
+
+.hero-block {
+    padding: 1.4rem 1.4rem 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.hero-title {
+    font-size: 1.7rem;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.hero-subtitle {
+    font-size: 0.88rem;
+    color: #727272;
+    line-height: 1.55;
+    margin-bottom: 1rem;
+}
+
+.bottom-line {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+    max-width: 900px;
+    margin-bottom: 1rem;
+}
+
+.summary-row {
+    display: flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+}
+
+.summary-pill {
+    background: #111111;
+    border: 1px solid #1d1d1d;
+    border-radius: 999px;
+    color: #8d8d8d;
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.62rem;
+}
+
+.section-block {
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.signals-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+}
+
+.signal-card {
+    background: #0a0a0a;
+    border: 1px solid #151515;
+    border-left: 3px solid #262626;
+    border-radius: 12px;
+    padding: 0.9rem 0.9rem 0.85rem;
+    min-width: 0;
+}
+
+.signal-card-title {
+    font-size: 0.72rem;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    color: #808080;
+    font-weight: 500;
+    margin-bottom: 0.45rem;
+}
+
+.signal-card-state {
+    font-size: 0.94rem;
+    font-weight: 600;
+    margin-bottom: 0.28rem;
+}
+
+.signal-card-score {
+    font-size: 0.8rem;
+    color: #a2a2a2;
+    margin-bottom: 0.4rem;
+}
+
+.signal-card-delta,
+.signal-card-note {
+    font-size: 0.68rem;
+    line-height: 1.45;
+    color: #6a6a6a;
+}
+
+.signal-card-note {
+    min-height: 2.05rem;
+}
+
+.signal-card-details {
+    margin-top: 0.65rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid #151515;
+}
+
+.signal-card-toggle {
+    list-style: none;
+    cursor: pointer;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7a7a7a;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.signal-card-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.signal-card-toggle::before {
+    content: "▸";
+    font-size: 0.7rem;
+    color: #5f5f5f;
+    transform: translateY(-0.5px);
+}
+
+.signal-card-details[open] .signal-card-toggle::before {
+    content: "▾";
+}
+
+.signal-card-etfs {
+    margin-top: 0.55rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+}
+
+.signal-card-etf-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.22rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid #202020;
+    background: #111111;
+    font-size: 0.64rem;
+    letter-spacing: 0.04em;
+    color: #8d8d8d;
+}
+
+.mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.mini-panel {
+    padding: 1rem 1rem 0.95rem;
+}
+
+.mini-section-title {
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #4a4a4a;
+    margin-bottom: 0.6rem;
+}
+
+.mini-section-copy {
+    font-size: 0.82rem;
+    line-height: 1.65;
+    color: #8a8a8a;
+}
+
+.chart-block {
+    padding: 1rem 1rem 0.7rem;
+}
+
+.footer {
+    margin-top: 0.9rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #3a3a3a;
+}
+
+@media (max-width: 1100px) {
+    .signals-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 760px) {
+    #app-root {
+        padding: 1.2rem 0.85rem 2rem;
+    }
+
+    .hero-title {
+        font-size: 1.35rem;
+    }
+
+    .signals-grid,
+    .mini-grid {
+        grid-template-columns: 1fr;
+    }
+}

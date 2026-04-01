@@ -1,13 +1,14 @@
 """
 data_pull.py
 Fetches ETF prices (yfinance) and FRED macro series, caches to parquet.
-Cache logic: if the parquet file was written today, load from disk.
-             Otherwise, hit the APIs and overwrite.
+Cache logic: reuse parquet files while they are fresh, otherwise refresh.
+If refresh fails, fall back to any existing cached files.
 """
 
 import os
-from datetime import date, datetime
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 import yfinance as yf
@@ -15,7 +16,7 @@ from dotenv import load_dotenv
 
 from config import (
     DATA_DIR, ETF_PARQUET, FRED_PARQUET,
-    FRED_SERIES, LAYERS, RATIO_EXTRAS, START_DATE,
+    DATA_FRESHNESS_MINUTES, FRED_SERIES, LAYERS, RATIO_EXTRAS, START_DATE,
 )
 
 load_dotenv()
@@ -34,12 +35,37 @@ def _all_etf_tickers() -> list[str]:
     return sorted(tickers)
 
 
-def _is_cached_today(filepath: str) -> bool:
+def _is_cache_fresh(filepath: str, freshness_minutes: int) -> bool:
     path = Path(filepath)
     if not path.exists():
         return False
-    mtime = datetime.fromtimestamp(path.stat().st_mtime).date()
-    return mtime == date.today()
+    mtime = datetime.fromtimestamp(path.stat().st_mtime)
+    max_age = timedelta(minutes=freshness_minutes)
+    return datetime.now() - mtime <= max_age
+
+
+def _cache_timestamp(filepath: str) -> Optional[datetime]:
+    path = Path(filepath)
+    if not path.exists():
+        return None
+    return datetime.fromtimestamp(path.stat().st_mtime)
+
+
+def _load_cached_data() -> tuple[pd.DataFrame, pd.DataFrame]:
+    return pd.read_parquet(ETF_PARQUET), pd.read_parquet(FRED_PARQUET)
+
+
+def _build_data_status(source: str, detail: str = "", error: str = "") -> dict[str, object]:
+    etf_ts = _cache_timestamp(ETF_PARQUET)
+    fred_ts = _cache_timestamp(FRED_PARQUET)
+    return {
+        "source": source,
+        "detail": detail,
+        "error": error,
+        "freshness_minutes": DATA_FRESHNESS_MINUTES,
+        "etf_timestamp": etf_ts.isoformat() if etf_ts else None,
+        "fred_timestamp": fred_ts.isoformat() if fred_ts else None,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -71,6 +97,8 @@ def fetch_etf_prices(tickers: list[str], start: str) -> pd.DataFrame:
 
     prices.index = pd.to_datetime(prices.index)
     prices.index.name = "date"
+    if prices.empty or prices.dropna(how="all").empty:
+        raise ValueError("ETF download returned no usable price history.")
     print(f"[data_pull] ETF data shape: {prices.shape}")
     return prices
 
@@ -130,25 +158,40 @@ def load_or_pull(force_refresh: bool = False) -> dict[str, pd.DataFrame]:
             "fred_data":  pd.DataFrame,  # FRED macro series
         }
 
-    If both parquet files were written today and force_refresh=False,
-    loads from disk. Otherwise hits the APIs and saves to disk.
+    Uses fresh cache when available. Otherwise hits the APIs and saves to disk.
+    If refresh fails but cached files exist, falls back to stale cache.
     """
     Path(DATA_DIR).mkdir(exist_ok=True)
 
-    etf_cached  = _is_cached_today(ETF_PARQUET)
-    fred_cached = _is_cached_today(FRED_PARQUET)
+    etf_cached = _is_cache_fresh(ETF_PARQUET, DATA_FRESHNESS_MINUTES)
+    fred_cached = _is_cache_fresh(FRED_PARQUET, DATA_FRESHNESS_MINUTES)
+    cache_available = Path(ETF_PARQUET).exists() and Path(FRED_PARQUET).exists()
 
     if not force_refresh and etf_cached and fred_cached:
-        print("[data_pull] Cache is current. Loading from disk...")
-        etf_prices = pd.read_parquet(ETF_PARQUET)
-        fred_data  = pd.read_parquet(FRED_PARQUET)
-    else:
-        tickers    = _all_etf_tickers()
+        print("[data_pull] Fresh cache available. Loading from disk...")
+        etf_prices, fred_data = _load_cached_data()
+        data_status = _build_data_status("cache_fresh", "Loaded fresh cached market and macro data.")
+        return {"etf_prices": etf_prices, "fred_data": fred_data, "data_status": data_status}
+
+    try:
+        tickers = _all_etf_tickers()
         etf_prices = fetch_etf_prices(tickers, START_DATE)
-        fred_data  = fetch_fred_data(FRED_SERIES, START_DATE)
+        fred_data = fetch_fred_data(FRED_SERIES, START_DATE)
 
         etf_prices.to_parquet(ETF_PARQUET)
         fred_data.to_parquet(FRED_PARQUET)
         print(f"[data_pull] Saved → {ETF_PARQUET}, {FRED_PARQUET}")
-
-    return {"etf_prices": etf_prices, "fred_data": fred_data}
+        detail = "Forced refresh from APIs." if force_refresh else "Cache was stale. Refreshed from APIs."
+        data_status = _build_data_status("live_refresh", detail)
+        return {"etf_prices": etf_prices, "fred_data": fred_data, "data_status": data_status}
+    except Exception as exc:
+        if not cache_available:
+            raise
+        print(f"[data_pull] Refresh failed. Falling back to cached files. Error: {exc}")
+        etf_prices, fred_data = _load_cached_data()
+        data_status = _build_data_status(
+            "stale_cache_fallback",
+            "Live refresh failed. Using cached market and macro data.",
+            error=str(exc),
+        )
+        return {"etf_prices": etf_prices, "fred_data": fred_data, "data_status": data_status}
