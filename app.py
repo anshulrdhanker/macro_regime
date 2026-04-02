@@ -148,7 +148,6 @@ app.layout = html.Div(
                     "Equities lead macro data, so to get an understanding of what equities are implying, I pulled ETF data (bucketed into areas of the economy), and extrapolated its behaviour relative to history.",
                     className="hero-subtitle",
                 ),
-                html.Div(dashboard_copy["bottom_line"], className="bottom-line"),
                 html.Div(
                     [
                         html.Span(regime_text, className="summary-pill", style={"color": regime_color}),
