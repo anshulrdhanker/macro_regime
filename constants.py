@@ -12,6 +12,12 @@ LAYER_META = {
         "short":     "Credit",
         "card_label": "Credit",
         "card_desc":  "High yield credit and bank sensitivity.",
+        "card_icon": "payments",
+        "score_tag_map": {
+            "negative": "Deflationary",
+            "neutral": "Balanced",
+            "positive": "Expansionary",
+        },
         "message_map": {
             "negative": "Softer Credit Conditions",
             "neutral": "No Strong Credit Signal",
@@ -26,6 +32,12 @@ LAYER_META = {
         "short":     "Global",
         "card_label": "Global Growth",
         "card_desc":  "Copper, chips, transports, and EM demand.",
+        "card_icon": "trending_up",
+        "score_tag_map": {
+            "negative": "Below Trend",
+            "neutral": "Stable",
+            "positive": "Above Trend",
+        },
         "message_map": {
             "negative": "Weaker Global Demand",
             "neutral": "No Strong Global Signal",
@@ -40,6 +52,12 @@ LAYER_META = {
         "short":     "US",
         "card_label": "Consumer & Housing",
         "card_desc":  "Homebuilders, small caps, and consumer demand.",
+        "card_icon": "home",
+        "score_tag_map": {
+            "negative": "Slowing",
+            "neutral": "Stable",
+            "positive": "Expansionary",
+        },
         "message_map": {
             "negative": "Softer Domestic Demand",
             "neutral": "No Strong Domestic Signal",
@@ -54,6 +72,12 @@ LAYER_META = {
         "short":     "Risk",
         "card_label": "Risk Appetite",
         "card_desc":  "Cyclicals vs defensives across the tape.",
+        "card_icon": "monitoring",
+        "score_tag_map": {
+            "negative": "Risk Off",
+            "neutral": "Mixed",
+            "positive": "Risk On",
+        },
         "message_map": {
             "negative": "Risk Appetite Is Fading",
             "neutral": "Risk Appetite Is Mixed",
@@ -68,6 +92,12 @@ LAYER_META = {
         "short":     "Inflation",
         "card_label": "Inflation",
         "card_desc":  "Energy, materials, metals, and ags.",
+        "card_icon": "show_chart",
+        "score_tag_map": {
+            "negative": "Disinflation",
+            "neutral": "Stable",
+            "positive": "Inflationary",
+        },
         "message_map": {
             "negative": "Inflation Pressure Is Easing",
             "neutral": "No Strong Inflation Signal",
@@ -82,6 +112,12 @@ LAYER_META = {
         "short":     "Stress",
         "card_label": "System Stress",
         "card_desc":  "Bonds, gold, and defensives as safety trades.",
+        "card_icon": "bolt",
+        "score_tag_map": {
+            "negative": "Fragile",
+            "neutral": "Stable",
+            "positive": "Orderly",
+        },
         "message_map": {
             "negative": "Stress Is Building",
             "neutral": "Stress Is Contained",
