@@ -3,6 +3,8 @@ app.py — Equity-Implied Macro Barometer
 Run with: python app.py
 """
 
+import os
+
 import pandas as pd
 import plotly.graph_objects as go
 from dash import Dash, dcc, html
@@ -54,6 +56,15 @@ def layer_state_label(z_value: float) -> str:
     return "Neutral"
 
 
+def layer_message(layer_key: str, z_value: float) -> str:
+    message_map = LAYER_META[layer_key].get("message_map", {})
+    if z_value > STATE_THRESHOLD:
+        return message_map.get("positive", "Improving")
+    if z_value < -STATE_THRESHOLD:
+        return message_map.get("negative", "Weakening")
+    return message_map.get("neutral", "Neutral")
+
+
 def make_timeline_fig(series: pd.Series, lookback: int = CHART_LOOKBACK) -> go.Figure:
     s = series.iloc[-lookback:]
     fig = go.Figure()
@@ -97,6 +108,7 @@ def build_signal_cards() -> html.Div:
     for layer in snapshot["layers"]:
         z_value = float(layer["z_score"])
         layer_meta = LAYER_META[layer["key"]]
+        message = layer_message(layer["key"], z_value)
         etf_pills = [
             html.Span(ticker.strip(), className="signal-card-etf-pill")
             for ticker in layer_meta["etfs"].split(" · ")
@@ -106,7 +118,7 @@ def build_signal_cards() -> html.Div:
             html.Div(
                 [
                     html.Div(layer_meta.get("card_label", layer["short"]), className="signal-card-title"),
-                    html.Div(layer_state_label(z_value), className="signal-card-state", style={"color": score_color(z_value)}),
+                    html.Div(message, className="signal-card-message", style={"color": score_color(z_value)}),
                     html.Div(f"{z_value:+.1f}σ", className="signal-card-score"),
                     html.Div(layer_meta.get("card_desc", ""), className="signal-card-note"),
                     html.Details(
@@ -125,21 +137,21 @@ def build_signal_cards() -> html.Div:
 
 
 app = Dash(__name__, title="Equity-Implied Macro Barometer")
+server = app.server
 
 app.layout = html.Div(
     [
         html.Div(
             [
-                html.Div("Equity-Implied Macro Barometer", className="hero-title"),
+                html.Div("What Equities Are Pricing", className="hero-title"),
                 html.Div(
-                    "What cyclical equity leadership is pricing 6 to 12 months ahead.",
+                    "Equities lead macro data, so to get an understanding of what equities are implying, I pulled ETF data (bucketed into areas of the economy), and extrapolated its behaviour relative to history.",
                     className="hero-subtitle",
                 ),
                 html.Div(dashboard_copy["bottom_line"], className="bottom-line"),
                 html.Div(
                     [
                         html.Span(regime_text, className="summary-pill", style={"color": regime_color}),
-                        html.Span(f"{dir_arrow} {dir_word}", className="summary-pill", style={"color": dir_color}),
                         html.Span(snapshot["breadth"], className="summary-pill"),
                         html.Span(data_status_label(), className="summary-pill"),
                     ],
@@ -177,7 +189,7 @@ app.layout = html.Div(
         ),
         html.Div(
             [
-                html.Div("Composite Trend", className="mini-section-title"),
+                html.Div("Six Market Bucket Signals Over Time", className="mini-section-title"),
                 dcc.Graph(
                     figure=make_timeline_fig(composite_discrete),
                     config={"displayModeBar": False},
@@ -195,4 +207,6 @@ app.layout = html.Div(
 
 
 if __name__ == "__main__":
-    app.run(debug=False, port=8050)
+    port = int(os.getenv("PORT", "8050"))
+    host = os.getenv("HOST", "0.0.0.0")
+    app.run(debug=False, host=host, port=port)

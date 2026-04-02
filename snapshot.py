@@ -243,7 +243,14 @@ def build_dashboard_copy(snapshot: dict[str, Any]) -> dict[str, str]:
         "Equity-implied signals come first. Official macro data is secondary context. "
         "Do not give portfolio advice. Do not invent facts. Use only the packet provided. "
         "Return exactly these fields: bottom_line, what_changed, confirmation, watch. "
-        "Each field must be one sentence in plain English."
+        "Each field must be one sentence in plain English. "
+        "Write like a concise PM morning note, not a dashboard tooltip. "
+        "For bottom_line, use a short market-first sentence. Start with 'Equities are' or 'The tape is'. "
+        "Do not mention the word 'barometer'. Do not mention the composite score number. "
+        "Prefer direct regime language like contraction, stabilization, recovery, or mixed transition. "
+        "For what_changed, say what worsened or improved over the past month and name the main drivers. "
+        "For confirmation, say whether official macro data is confirming, lagging, or diverging from the market signal. "
+        "For watch, say what to monitor next in one direct sentence."
     )
 
     try:
