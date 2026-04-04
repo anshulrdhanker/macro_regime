@@ -92,26 +92,38 @@ def score_tag(layer_key: str, z_value: float) -> str:
 
 def hero_tail(delta: int) -> str:
     if delta >= 2:
-        return "and the tape has improved over the past month."
+        return " but the tape has improved over the past month."
     if delta >= 1:
-        return "and the tape has started to improve over the past month."
+        return " but the tape has started to improve over the past month."
     if delta == 0:
         return "and the tape has not improved over the past month."
     if delta <= -2:
-        return "and the tape has deteriorated over the past month."
-    return "and the tape is still weakening at the margin."
+        return " and the tape has deteriorated over the past month."
+    return " and the tape is still weakening at the margin."
 
 
 def signal_strength_meta() -> str:
-    strength = abs(snapshot["composite_score"]) / max(len(snapshot["layers"]), 1)
-    pct = int(round(strength * 100))
-    if pct >= 67:
-        conviction = "High"
-    elif pct >= 34:
-        conviction = "Medium"
-    else:
-        conviction = "Low"
-    return f"{pct}% (Conviction: {conviction})"
+    total_layers = max(len(snapshot["layers"]), 1)
+    risk_off = sum(1 for vote in snapshot["layer_votes"].values() if vote == -1)
+    risk_on = sum(1 for vote in snapshot["layer_votes"].values() if vote == 1)
+    neutral = total_layers - risk_off - risk_on
+    if risk_off > risk_on:
+        return (
+            f"{risk_off}/{total_layers} buckets are ",
+            "risk off",
+            regime_color,
+        )
+    if risk_on > risk_off:
+        return (
+            f"{risk_on}/{total_layers} buckets are ",
+            "risk on",
+            "#4a9e6e",
+        )
+    return (
+        f"{neutral}/{total_layers} buckets are ",
+        "neutral",
+        "#d2d8e0",
+    )
 
 
 def build_note_items(title: str, text: str) -> list[html.Li]:
@@ -256,7 +268,7 @@ app.layout = html.Div(
                     [
                         html.Div(
                             [
-                                html.Span("Revere Terminal", className="topbar-brand"),
+                                html.Span("Citrini Terminal", className="topbar-brand"),
                             ],
                             className="topbar-left",
                         ),
@@ -301,8 +313,18 @@ app.layout = html.Div(
                                                 html.Div(className="hero-meta-divider"),
                                                 html.Div(
                                                     [
-                                                        html.Div("Signal Strength", className="hero-meta-label"),
-                                                        html.Div(signal_strength_meta(), className="hero-meta-value"),
+                                                        html.Div("Signal", className="hero-meta-label"),
+                                                        html.Div(
+                                                            [
+                                                                html.Span(signal_strength_meta()[0], className="hero-meta-signal-prefix"),
+                                                                html.Span(
+                                                                    signal_strength_meta()[1],
+                                                                    className="hero-meta-signal-word",
+                                                                    style={"color": signal_strength_meta()[2]},
+                                                                ),
+                                                            ],
+                                                            className="hero-meta-value hero-meta-signal",
+                                                        ),
                                                     ],
                                                     className="hero-meta-block",
                                                 ),
