@@ -66,6 +66,8 @@ def layer_message(layer_key: str, z_value: float) -> str:
 
 
 def card_accent_color(z_value: float) -> str:
+    if z_value > STATE_THRESHOLD:
+        return "#d2d8e0" if z_value < 1.25 else "#4a9e6e"
     if z_value < -STATE_THRESHOLD:
         return "#bb5551"
     return "#d2d8e0"
