@@ -268,7 +268,7 @@ app.layout = html.Div(
                     [
                         html.Div(
                             [
-                                html.Span("Citrini Terminal", className="topbar-brand"),
+                                html.Span("Ramp Terminal", className="topbar-brand"),
                             ],
                             className="topbar-left",
                         ),
