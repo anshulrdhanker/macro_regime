@@ -90,10 +90,14 @@ def score_tag(layer_key: str, z_value: float) -> str:
     return tag_map.get("neutral", "Neutral")
 
 
-def hero_tail(delta: int) -> str:
+def hero_tail(composite_score: int, delta: int) -> str:
     if delta >= 2:
+        if composite_score > 0:
+            return " and the tape has improved over the past month."
         return " but the tape has improved over the past month."
     if delta >= 1:
+        if composite_score > 0:
+            return " and the tape has started to improve over the past month."
         return " but the tape has started to improve over the past month."
     if delta == 0:
         return "and the tape has not improved over the past month."
@@ -296,7 +300,10 @@ app.layout = html.Div(
                                             [
                                                 html.Span("Equities are in ", className="hero-sentence-base"),
                                                 html.Span(regime_text.lower(), className="hero-sentence-regime", style={"color": regime_color}),
-                                                html.Span(f" {hero_tail(snapshot['composite_1m_change'])}", className="hero-sentence-base"),
+                                                html.Span(
+                                                    f" {hero_tail(snapshot['composite_score'], snapshot['composite_1m_change'])}",
+                                                    className="hero-sentence-base",
+                                                ),
                                             ],
                                             className="hero-title",
                                         ),
