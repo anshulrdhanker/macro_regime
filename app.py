@@ -268,7 +268,7 @@ app.layout = html.Div(
                     [
                         html.Div(
                             [
-                                html.Span("Ramp Terminal", className="topbar-brand"),
+                                html.Span(">Terminal", className="topbar-brand"),
                             ],
                             className="topbar-left",
                         ),
@@ -278,7 +278,6 @@ app.layout = html.Div(
                                     [html.Span("notifications", className="material-symbols-outlined topbar-icon"), html.Span(className="topbar-dot")],
                                     className="topbar-icon-wrap",
                                 ),
-                                html.Span("settings", className="material-symbols-outlined topbar-icon"),
                                 html.Div("A", className="topbar-avatar"),
                             ],
                             className="topbar-right",
